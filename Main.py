@@ -246,4 +246,6 @@ def download_file():
 
 # Run Flask on port 80 for HTTP access (might need sudo for permission)
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+   
+        context = ('/etc/letsencrypt/live/harithx.com/fullchain.pem', '/etc/letsencrypt/live/harithx.com/privkey.pem')
+    app.run(host='0.0.0.0', port=443, ssl_context=context)
