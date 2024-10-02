@@ -6,7 +6,59 @@ import json
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
-# Your existing functions here...
+# Function to calculate additional statistics
+def calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay):
+    stats = {}
+
+    # Total number of transactions in each file
+    stats['total_azm_transactions'] = azm_df.shape[0]
+    stats['total_hyperpay_transactions'] = hyperpay_df.shape[0]
+
+    # Total number of missing transactions
+    stats['missing_from_azm_count'] = missing_from_azm.shape[0]
+    stats['missing_from_hyperpay_count'] = missing_from_hyperpay.shape[0]
+
+    # Total amount in AZM and HyperPay
+    stats['total_amount_azm'] = azm_df['المبلغ (ريال)'].sum()
+    stats['total_amount_hyperpay'] = hyperpay_df['Credit'].sum()
+
+    # Total amount of missing transactions from AZM and HyperPay
+    stats['total_amount_missing_from_azm'] = missing_from_azm['Credit'].sum() if not missing_from_azm.empty else 0
+    stats['total_amount_missing_from_hyperpay'] = missing_from_hyperpay['المبلغ (ريال)'].sum() if not missing_from_hyperpay.empty else 0
+
+    return stats
+
+# Function to compare transactions
+def compare_transactions(azm_df, hyperpay_df):
+    # Filter HyperPay transactions where Credit is greater than 0
+    hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
+
+    # Perform the comparison based on the columns provided
+    merged_df = pd.merge(
+        azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)']],
+        hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp']],
+        left_on='تفاصيل العملية (رقم الحوالة)', 
+        right_on='TransactionId', 
+        how='outer', indicator=True
+    )
+
+    # Get statistics of missing transactions
+    missing_from_azm = merged_df[merged_df['_merge'] == 'right_only'].dropna(axis=1, how='all')
+    missing_from_hyperpay = merged_df[merged_df['_merge'] == 'left_only'].dropna(axis=1, how='all')
+
+    # Drop the `_merge` column
+    missing_from_azm = missing_from_azm.drop(columns=['_merge'])
+    missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'])
+
+    # Generate HTML tables for missing transactions
+    missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=0)
+    missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=0)
+
+    # Calculate overall statistics
+    stats = calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay)
+
+    # Return the stats and tables
+    return stats, missing_from_azm_table, missing_from_hyperpay_table, missing_from_azm, missing_from_hyperpay
 
 # Route for the upload page (accessible at /SHEFA)
 @app.route('/SHEFA', methods=['GET', 'POST'])
