@@ -51,8 +51,8 @@ def compare_transactions(azm_df, hyperpay_df):
     missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'])
 
     # Generate HTML tables for missing transactions
-    missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=0)
-    missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=0)
+    missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1)
+    missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=1)
 
     # Calculate overall statistics
     stats = calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay)
@@ -138,6 +138,22 @@ def upload_files():
             .table-container {{
                 overflow-x: auto;
                 margin-bottom: 20px;
+            }}
+            table {{
+                border-collapse: collapse;
+                width: 100%;
+                text-align: left;
+            }}
+            th, td {{
+                border: 1px solid #ddd;
+                padding: 8px;
+            }}
+            th {{
+                background-color: #4CAF50;
+                color: white;
+            }}
+            tr:nth-child(even) {{
+                background-color: #f9f9f9;
             }}
             .btn {{
                 background-color: #4CAF50;
@@ -228,5 +244,6 @@ def download_file():
 
     return response
 
+# Run Flask on port 80 for HTTP access (might need sudo for permission)
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
