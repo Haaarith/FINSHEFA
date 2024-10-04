@@ -20,5 +20,5 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |  
         echo "$SSH_PRIVATE_KEY" > private_key
-        chmod 400 private_key
+        chmod 600 private_key
         ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "bash /home/ubuntu/deploy.sh"
