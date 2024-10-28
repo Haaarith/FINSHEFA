@@ -33,6 +33,10 @@ def compare_transactions(azm_df, hyperpay_df):
     # Ensure 'Credit' column in hyperpay_df is numeric, converting any non-numeric values to NaN
     hyperpay_df['Credit'] = pd.to_numeric(hyperpay_df['Credit'], errors='coerce')
 
+    # Clean and standardize merge key columns to avoid mismatches
+    azm_df['تفاصيل العملية (رقم الحوالة)'] = azm_df['تفاصيل العملية (رقم الحوالة)'].str.strip().astype(str)
+    hyperpay_df['TransactionId'] = hyperpay_df['TransactionId'].str.strip().astype(str)
+
     # Filter HyperPay transactions where Credit is greater than 0
     hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
@@ -45,17 +49,23 @@ def compare_transactions(azm_df, hyperpay_df):
         how='outer', indicator=True
     )
 
-    # Get statistics of missing transactions
-    missing_from_azm = merged_df[merged_df['_merge'] == 'right_only'].dropna(axis=1, how='all')
-    missing_from_hyperpay = merged_df[merged_df['_merge'] == 'left_only'].dropna(axis=1, how='all')
+    # Check if the merged DataFrame contains any `_merge` information
+    if '_merge' in merged_df.columns and not merged_df.empty:
+        # Get statistics of missing transactions
+        missing_from_azm = merged_df[merged_df['_merge'] == 'right_only'].dropna(axis=1, how='all')
+        missing_from_hyperpay = merged_df[merged_df['_merge'] == 'left_only'].dropna(axis=1, how='all')
 
-    # Drop the `_merge` column
-    missing_from_azm = missing_from_azm.drop(columns=['_merge'])
-    missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'])
+        # Drop the `_merge` column if it exists
+        missing_from_azm = missing_from_azm.drop(columns=['_merge'], errors='ignore')
+        missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'], errors='ignore')
+    else:
+        # Set missing transactions as empty DataFrames if there are no missing records
+        missing_from_azm = pd.DataFrame()
+        missing_from_hyperpay = pd.DataFrame()
 
     # Generate HTML tables for missing transactions
-    missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1)
-    missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=1)
+    missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1) if not missing_from_azm.empty else "No missing transactions from AZM."
+    missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=1) if not missing_from_hyperpay.empty else "No missing transactions from HyperPay."
 
     # Calculate overall statistics
     stats = calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay)
