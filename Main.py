@@ -30,6 +30,9 @@ def calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyp
 
 # Function to compare transactions
 def compare_transactions(azm_df, hyperpay_df):
+    # Ensure 'Credit' column in hyperpay_df is numeric, converting any non-numeric values to NaN
+    hyperpay_df['Credit'] = pd.to_numeric(hyperpay_df['Credit'], errors='coerce')
+
     # Filter HyperPay transactions where Credit is greater than 0
     hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
@@ -59,6 +62,7 @@ def compare_transactions(azm_df, hyperpay_df):
 
     # Return the stats and tables
     return stats, missing_from_azm_table, missing_from_hyperpay_table, missing_from_azm, missing_from_hyperpay
+
 
 # Route for the upload page (accessible at /SHEFA)
 @app.route('/SHEFA', methods=['GET', 'POST'])
