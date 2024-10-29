@@ -259,7 +259,7 @@ def download_file():
     return response
 
 
-@app.route('/IBAN', methods=['GET', 'POST'])
+@app.route('/IBAN')
 def cc();
     return redirect(http://127.0.0.1:5001)
 
