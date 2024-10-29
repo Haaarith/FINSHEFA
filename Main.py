@@ -258,6 +258,10 @@ def download_file():
 
     return response
 
+
+@app.route('/IBAN', methods=['GET', 'POST'])
+    return redirect(http://127.0.0.1:5001)
+
 # Run Flask on port 80 for HTTP access (might need sudo for permission)
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000)
