@@ -7,6 +7,8 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
+
+SESSION_TYPE = "filesystem"
 # Session configuration
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
