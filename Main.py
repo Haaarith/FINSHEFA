@@ -87,7 +87,7 @@ def compare_transactions(azm_df, hyperpay_df):
 
 
 # Route for the upload page (accessible at /SHEFA)
-@app.route('/SHEFA', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def upload_files():
     if request.method == 'POST':
         # Get the uploaded files
