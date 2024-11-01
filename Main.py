@@ -5,6 +5,8 @@ import json
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # Function to calculate additional statistics
 def calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay):
