@@ -1,11 +1,19 @@
-from flask import Flask, render_template, request, make_response, session, redirect
+from flask import Flask, render_template, request, make_response, session, redirect, session
+from flask_session import Session
+import redis
 import pandas as pd
 from io import BytesIO
 import json
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Set a secret key for session management
-app.config["SESSION_TYPE"] = "filesystem"
+# Session configuration
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_REDIS"] = redis.Redis(host='localhost', port=6379)
+
+# Initialize the session
 Session(app)
 
 # Function to calculate additional statistics
