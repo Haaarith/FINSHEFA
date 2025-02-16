@@ -196,7 +196,7 @@ def upload_files():
         '''
     return '''
     <div class="container">
-        <h1 style="color: #4CAF50; text-align: center;">Nigg3rUpload CSV Files for AZM and HyperPay</h1>
+        <h1 style="color: #4CAF50; text-align: center;">Upload CSV Files for AZM and HyperPay</h1>
         <form method="post" enctype="multipart/form-data" style="text-align: center;">
             <label for="azm_files" style="font-weight: bold;">Upload AZM DB CSV Files (You can select multiple):</label><br>
             <input type="file" name="azm_files" multiple accept=".csv" style="margin-bottom: 20px;"><br>
