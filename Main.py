@@ -54,7 +54,7 @@ def compare_transactions(azm_df, hyperpay_df):
     # Perform the comparison based on the columns provided
     merged_df = pd.merge(
         azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)']],
-        hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp']],
+        hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp', 'Result']],
         left_on='تفاصيل العملية (رقم الحوالة)', 
         right_on='TransactionId', 
         how='outer', indicator=True
@@ -73,6 +73,10 @@ def compare_transactions(azm_df, hyperpay_df):
         # Set missing transactions as empty DataFrames if there are no missing records
         missing_from_azm = pd.DataFrame()
         missing_from_hyperpay = pd.DataFrame()
+
+    # Add HyperPay status to missing_from_azm if available
+    if not missing_from_azm.empty:
+        missing_from_azm['HyperPay Status'] = missing_from_azm['Result']
 
     # Generate HTML tables for missing transactions
     missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1) if not missing_from_azm.empty else "No missing transactions from AZM."
