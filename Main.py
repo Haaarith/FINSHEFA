@@ -17,7 +17,6 @@ app.config["SESSION_REDIS"] = redis.Redis(host='localhost', port=6379)
 
 # Initialize the session
 Session(app)
-
 # Function to calculate additional statistics
 def calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay):
     stats = {}
@@ -60,23 +59,18 @@ def compare_transactions(azm_df, hyperpay_df):
         how='outer', indicator=True
     )
 
-    # Check if the merged DataFrame contains any `_merge` information
-    if '_merge' in merged_df.columns and not merged_df.empty:
-        # Get statistics of missing transactions
-        missing_from_azm = merged_df[merged_df['_merge'] == 'right_only'].dropna(axis=1, how='all')
-        missing_from_hyperpay = merged_df[merged_df['_merge'] == 'left_only'].dropna(axis=1, how='all')
+    # Identify missing transactions
+    missing_from_azm = merged_df[(merged_df['_merge'] == 'right_only') | 
+                                 ((merged_df['_merge'] == 'both') & (merged_df['حالة العملية'] != 'Success'))]
+    missing_from_hyperpay = merged_df[merged_df['_merge'] == 'left_only']
 
-        # Drop the `_merge` column if it exists
-        missing_from_azm = missing_from_azm.drop(columns=['_merge'], errors='ignore')
-        missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'], errors='ignore')
-    else:
-        # Set missing transactions as empty DataFrames if there are no missing records
-        missing_from_azm = pd.DataFrame()
-        missing_from_hyperpay = pd.DataFrame()
+    # Drop the `_merge` column if it exists
+    missing_from_azm = missing_from_azm.drop(columns=['_merge'], errors='ignore')
+    missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'], errors='ignore')
 
     # Add HyperPay status to missing_from_azm if available
     if not missing_from_azm.empty:
-        missing_from_azm['HyperPay Status'] = missing_from_azm['Result']
+        missing_from_azm['HyperPay Status'] = missing_from_azm['Result'] if 'Result' in missing_from_azm.columns else None
 
     # Generate HTML tables for missing transactions
     missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1) if not missing_from_azm.empty else "No missing transactions from AZM."
