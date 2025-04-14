@@ -135,6 +135,8 @@ def upload_files():
             <p><strong>Total Amount in HyperPay:</strong> {stats['total_amount_hyperpay']} SAR</p>
             <p><strong>Total Amount Missing from AZM:</strong> {stats['total_amount_missing_from_azm']} SAR</p>
             <p><strong>Total Amount Missing from HyperPay:</strong> {stats['total_amount_missing_from_hyperpay']} SAR</p>
+            <p><strong>Total Status Mismatches:</strong> {stats['status_mismatch_count']} transactions</p>
+            <p><strong>Total Amount in Status Mismatches:</strong> {stats['total_amount_status_mismatch']} SAR</p>
           </div>
           
           <h2 style="color: #333; text-align: center;">Missing Transactions from AZM</h2>
@@ -160,55 +162,55 @@ def upload_files():
 
         <style>
             body {{
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-                color: #333;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
             }}
             .container {{
-                max-width: 800px;
-                margin: 0 auto;
-                background-color: #fff;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             }}
             h1 {{
-                color: #4CAF50;
-                margin-bottom: 20px;
+            color: #4CAF50;
+            margin-bottom: 20px;
             }}
             .stats {{
-                margin-bottom: 30px;
+            margin-bottom: 30px;
             }}
             .table-container {{
-                overflow-x: auto;
-                margin-bottom: 20px;
+            overflow-x: auto;
+            margin-bottom: 20px;
             }}
             table {{
-                border-collapse: collapse;
-                width: 100%;
-                text-align: left;
+            border-collapse: collapse;
+            width: 100%;
+            text-align: left;
             }}
             th, td {{
-                border: 1px solid #ddd;
-                padding: 8px;
+            border: 1px solid #ddd;
+            padding: 8px;
             }}
             th {{
-                background-color: #4CAF50;
-                color: white;
+            background-color: #4CAF50;
+            color: white;
             }}
             tr:nth-child(even) {{
-                background-color: #f9f9f9;
+            background-color: #f9f9f9;
             }}
             .btn {{
-                background-color: #4CAF50;
-                color: white;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             }}
             .btn:hover {{
-                background-color: #45a049;
+            background-color: #45a049;
             }}
         </style>
         '''
