@@ -39,7 +39,7 @@ def calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyp
     stats['total_amount_missing_from_hyperpay'] = missing_from_hyperpay['المبلغ (ريال)'].sum() if not missing_from_hyperpay.empty else 0
 
     return stats
-    def compare_transactions(azm_df, hyperpay_df):
+def compare_transactions(azm_df, hyperpay_df):
         # Ensure 'Credit' column in hyperpay_df is numeric, converting any non-numeric values to NaN
         hyperpay_df['Credit'] = pd.to_numeric(hyperpay_df['Credit'], errors='coerce')
 
