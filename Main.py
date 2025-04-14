@@ -39,54 +39,58 @@ def calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyp
     stats['total_amount_missing_from_hyperpay'] = missing_from_hyperpay['المبلغ (ريال)'].sum() if not missing_from_hyperpay.empty else 0
 
     return stats
+    def compare_transactions(azm_df, hyperpay_df):
+        # Ensure 'Credit' column in hyperpay_df is numeric, converting any non-numeric values to NaN
+        hyperpay_df['Credit'] = pd.to_numeric(hyperpay_df['Credit'], errors='coerce')
 
-def compare_transactions(azm_df, hyperpay_df):
-    # Ensure 'Credit' column in hyperpay_df is numeric, converting any non-numeric values to NaN
-    hyperpay_df['Credit'] = pd.to_numeric(hyperpay_df['Credit'], errors='coerce')
+        # Filter HyperPay transactions to include only rows with Result as 'ACK' and Credit > 0
+        hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
-    # Filter HyperPay transactions to include only rows with Result as 'ACK' and Credit > 0
-    hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
+        # Clean and standardize merge key columns to avoid mismatches
+        azm_df['تفاصيل العملية (رقم الحوالة)'] = azm_df['تفاصيل العملية (رقم الحوالة)'].str.strip().astype(str)
+        hyperpay_df['TransactionId'] = hyperpay_df['TransactionId'].str.strip().astype(str)
 
-    # Clean and standardize merge key columns to avoid mismatches
-    azm_df['تفاصيل العملية (رقم الحوالة)'] = azm_df['تفاصيل العملية (رقم الحوالة)'].str.strip().astype(str)
-    hyperpay_df['TransactionId'] = hyperpay_df['TransactionId'].str.strip().astype(str)
+        # Perform the comparison based on the columns provided
+        merged_df = pd.merge(
+            azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)']],
+            hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp', 'Result']],
+            left_on='تفاصيل العملية (رقم الحوالة)', 
+            right_on='TransactionId', 
+            how='outer', indicator=True
+        )
 
-    # Perform the comparison based on the columns provided
-    merged_df = pd.merge(
-        azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)']],
-        hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp', 'Result']],
-        left_on='تفاصيل العملية (رقم الحوالة)', 
-        right_on='TransactionId', 
-        how='outer', indicator=True
-    )
+        # Initialize DataFrames for missing and mismatched transactions
+        missing_from_azm = pd.DataFrame()
+        missing_from_hyperpay = pd.DataFrame()
+        status_mismatch = pd.DataFrame()
 
-    # Identify missing transactions
-    missing_from_azm = merged_df[(merged_df['_merge'] == 'right_only') & (merged_df['Result'] != 'NOK')]
-    missing_from_hyperpay = merged_df[(merged_df['_merge'] == 'left_only') & (azm_df['حالة العملية'] != 'rejected')]
+        # Iterate through merged DataFrame to classify transactions
+        for _, row in merged_df.iterrows():
+            if row['_merge'] == 'right_only' and row['Result'] != 'NOK':
+                # Missing from AZM
+                missing_from_azm = pd.concat([missing_from_azm, row.to_frame().T], ignore_index=True)
+            elif row['_merge'] == 'left_only' and row['حالة العملية'] != 'rejected':
+                # Missing from HyperPay
+                missing_from_hyperpay = pd.concat([missing_from_hyperpay, row.to_frame().T], ignore_index=True)
+            elif row['_merge'] == 'both' and row['Result'] == 'ACK' and row['حالة العملية'] != 'success':
+                # Status mismatch
+                status_mismatch = pd.concat([status_mismatch, row.to_frame().T], ignore_index=True)
 
-    # Identify status mismatches
-    status_mismatch = merged_df[
-        (merged_df['_merge'] == 'both') &
-        (merged_df['Result'] == 'ACK') &
-        (azm_df['حالة العملية'] != 'success')
-    ]
+        # Drop the `_merge` column
+        missing_from_azm = missing_from_azm.drop(columns=['_merge'], errors='ignore')
+        missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'], errors='ignore')
+        status_mismatch = status_mismatch.drop(columns=['_merge'], errors='ignore')
 
-    # Drop the `_merge` column
-    missing_from_azm = missing_from_azm.drop(columns=['_merge'], errors='ignore')
-    missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'], errors='ignore')
-    status_mismatch = status_mismatch.drop(columns=['_merge'], errors='ignore')
+        # Generate HTML tables for missing transactions and status mismatches
+        missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1) if not missing_from_azm.empty else "No missing transactions from AZM."
+        missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=1) if not missing_from_hyperpay.empty else "No missing transactions from HyperPay."
+        status_mismatch_table = status_mismatch.to_html(index=False, classes='table table-striped', border=1) if not status_mismatch.empty else "No status mismatches found."
 
-    # Generate HTML tables for missing transactions and status mismatches
-    missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1) if not missing_from_azm.empty else "No missing transactions from AZM."
-    missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=1) if not missing_from_hyperpay.empty else "No missing transactions from HyperPay."
-    status_mismatch_table = status_mismatch.to_html(index=False, classes='table table-striped', border=1) if not status_mismatch.empty else "No status mismatches found."
+        # Calculate overall statistics
+        stats = calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay)
 
-    # Calculate overall statistics
-    stats = calculate_statistics(azm_df, hyperpay_df, missing_from_azm, missing_from_hyperpay)
-
-    # Return the stats, tables, and mismatches
-    return stats, missing_from_azm_table, missing_from_hyperpay_table, status_mismatch_table, missing_from_azm, missing_from_hyperpay, status_mismatch
-
+        # Return the stats, tables, and mismatches
+        return stats, missing_from_azm_table, missing_from_hyperpay_table, status_mismatch_table, missing_from_azm, missing_from_hyperpay, status_mismatch
 
 
 # Route for the upload page (accessible at /SHEFA)
