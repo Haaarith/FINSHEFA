@@ -106,13 +106,14 @@ def upload_files():
         hyperpay_df = pd.concat(hyperpay_df_list, ignore_index=True)
 
         # Compare the transactions
-        stats, missing_from_azm_table, missing_from_hyperpay_table, missing_from_azm, missing_from_hyperpay = compare_transactions(azm_df, hyperpay_df)
+        stats, missing_from_azm_table, missing_from_hyperpay_table, status_mismatch_table, missing_from_azm, missing_from_hyperpay, status_mismatch = compare_transactions(azm_df, hyperpay_df)
 
-        # Save missing transactions in session (convert DataFrame to JSON to store it)
+        # Save missing transactions and mismatches in session (convert DataFrame to JSON to store it)
         session['missing_from_azm'] = missing_from_azm.to_json(orient='split')
         session['missing_from_hyperpay'] = missing_from_hyperpay.to_json(orient='split')
+        session['status_mismatch'] = status_mismatch.to_json(orient='split')
 
-        # Display results with statistics and missing transaction details
+        # Display results with statistics, missing transaction details, and mismatches
         return f'''
         <div class="container">
           <h1 style="color: #4CAF50; text-align: center;">Comparison Results</h1>
@@ -135,6 +136,11 @@ def upload_files():
           <h2 style="color: #333; text-align: center;">Missing Transactions from HyperPay</h2>
           <div class="table-container">
             {missing_from_hyperpay_table}
+          </div>
+
+          <h2 style="color: #333; text-align: center;">Status Mismatches</h2>
+          <div class="table-container">
+            {status_mismatch_table}
           </div>
 
           <form action="/download" method="post" style="text-align: center;">
