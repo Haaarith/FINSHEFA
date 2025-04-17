@@ -52,7 +52,7 @@ def compare_transactions(azm_df, hyperpay_df):
     azm_df['المبلغ (ريال)'] = pd.to_numeric(azm_df['المبلغ (ريال)'], errors='coerce')
 
     # Filter HyperPay transactions to include only rows with Result as 'ACK' and Credit > 0
-    #hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
+    hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
     # Clean and standardize merge key columns to avoid mismatches
     azm_df['تفاصيل العملية (رقم الحوالة)'] = azm_df['تفاصيل العملية (رقم الحوالة)'].str.strip().astype(str)
