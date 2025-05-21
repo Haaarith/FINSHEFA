@@ -55,8 +55,8 @@ def compare_transactions(azm_df, hyperpay_df):
     hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
     # Clean and standardize merge key columns to avoid mismatches
-    azm_df['تفاصيل العملية (رقم الحوالة)'] = azm_df['تفاصيل العملية (رقم الحوالة)'].str.strip().astype(str)
-    hyperpay_df['TransactionId'] = hyperpay_df['TransactionId'].str.strip().astype(str)
+    azm_df.loc[:, 'تفاصيل العملية (رقم الحوالة)'] = azm_df['تفاصيل العملية (رقم الحوالة)'].str.strip().astype(str)
+    hyperpay_df.loc[:, 'TransactionId'] = hyperpay_df['TransactionId'].str.strip().astype(str)
 
     # Perform the comparison based on the columns provided
     merged_df = pd.merge(
