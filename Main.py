@@ -77,7 +77,7 @@ def compare_transactions(azm_df, hyperpay_df):
         if row['_merge'] == 'right_only' and row['Result'] != 'NOK':
             # Missing from AZM
             missing_from_azm = pd.concat([missing_from_azm, row[['TransactionId', 'Credit', 'RequestTimestamp', 'Result']].to_frame().T], ignore_index=True)
-        elif row['_merge'] == 'left_only' and row['حالة العملية'] != 'rejected':
+        elif row['_merge'] == 'left_only' and row['حالة العملية'] != 'rejected' and row['حالة العملية'] !='time_out':
             # Missing from HyperPay
             missing_from_hyperpay = pd.concat([missing_from_hyperpay, row[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)']].to_frame().T], ignore_index=True)
         elif row['_merge'] == 'both' and row['Result'] == 'ACK' and row['حالة العملية'] != 'success':
