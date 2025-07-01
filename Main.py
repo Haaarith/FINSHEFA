@@ -52,7 +52,9 @@ def compare_transactions(azm_df, hyperpay_df):
         # Ensure 'المبلغ (ريال)' column in azm_df is numeric, converting any non-numeric values to NaN
         # Remove commas and convert to numeric
         azm_df['المبلغ (ريال)'] = pd.to_numeric(azm_df['المبلغ (ريال)'].str.replace(',', ''), errors='coerce')
-
+        
+        # Ensure 'id' column in azm_df is an integer
+        azm_df['id'] = azm_df['id'].astype(int)  # Ensure 'id' column is an integer
         # Filter HyperPay transactions to include only rows with Result as 'ACK' and Credit > 0
         hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
@@ -300,11 +302,6 @@ def download_file():
         response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     return response
-
-
-@app.route('/IBAN')
-def cc():
-    return redirect("http://127.0.0.1:5001")
 
 # Run Flask on port 80 for HTTP access (might need sudo for permission)
 if __name__ == '__main__':
