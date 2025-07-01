@@ -52,9 +52,9 @@ def compare_transactions(azm_df, hyperpay_df):
         # Ensure 'المبلغ (ريال)' column in azm_df is numeric, converting any non-numeric values to NaN
         # Remove commas and convert to numeric
         azm_df['المبلغ (ريال)'] = pd.to_numeric(azm_df['المبلغ (ريال)'].str.replace(',', ''), errors='coerce')
-        
+
         # Ensure 'id' column in azm_df is an integer
-        azm_df['id'] = azm_df['id'].astype(int)  # Ensure 'id' column is an integer
+        azm_df['id'] = pd.to_numeric(azm_df['id'], errors='coerce').fillna(0).astype(int)  # Ensure 'id' column is an integer, handling NaN or non-numeric values
         # Filter HyperPay transactions to include only rows with Result as 'ACK' and Credit > 0
         hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
