@@ -62,7 +62,7 @@ def compare_transactions(azm_df, hyperpay_df):
 
         # Perform the comparison based on the columns provided
         merged_df = pd.merge(
-            azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)']],
+            azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)','id']],
             hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp', 'Result']],
             left_on='تفاصيل العملية (رقم الحوالة)', 
             right_on='TransactionId', 
