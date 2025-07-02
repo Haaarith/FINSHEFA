@@ -53,8 +53,6 @@ def compare_transactions(azm_df, hyperpay_df):
         # Remove commas and convert to numeric
         azm_df['المبلغ (ريال)'] = pd.to_numeric(azm_df['المبلغ (ريال)'].str.replace(',', ''), errors='coerce')
 
-        # Ensure 'id' column in azm_df is an integer
-        azm_df['id'] = pd.to_numeric(azm_df['id'], errors='coerce').fillna(0).astype(int)  # Ensure 'id' column is an integer, handling NaN or non-numeric values
         # Filter HyperPay transactions to include only rows with Result as 'ACK' and Credit > 0
         hyperpay_df = hyperpay_df[hyperpay_df['Credit'] > 0]
 
@@ -64,7 +62,7 @@ def compare_transactions(azm_df, hyperpay_df):
 
         # Perform the comparison based on the columns provided
         merged_df = pd.merge(
-            azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)','id']],
+            azm_df[['تاريخ العملية', 'حالة العملية', 'تفاصيل العملية (رقم الحوالة)', 'وسيلة الدفع', 'المبلغ (ريال)','id','ChannelId']],
             hyperpay_df[['TransactionId', 'Credit', 'RequestTimestamp', 'Result']],
             left_on='تفاصيل العملية (رقم الحوالة)', 
             right_on='TransactionId', 
@@ -92,7 +90,7 @@ def compare_transactions(azm_df, hyperpay_df):
         missing_from_azm = missing_from_azm.drop(columns=['_merge'], errors='ignore')
         missing_from_hyperpay = missing_from_hyperpay.drop(columns=['_merge'], errors='ignore')
         status_mismatch = status_mismatch.drop(columns=['_merge'], errors='ignore')
-
+        
         # Generate HTML tables for missing transactions and status mismatches
         missing_from_azm_table = missing_from_azm.to_html(index=False, classes='table table-striped', border=1) if not missing_from_azm.empty else "No missing transactions from AZM."
         missing_from_hyperpay_table = missing_from_hyperpay.to_html(index=False, classes='table table-striped', border=1) if not missing_from_hyperpay.empty else "No missing transactions from HyperPay."
